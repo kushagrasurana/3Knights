@@ -173,19 +173,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="back2">
-   <property name="geometry">
-    <rect>
-     <x>200</x>
-     <y>360</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Back</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="load_game2">
    <property name="geometry">
     <rect>
@@ -290,6 +277,37 @@
     </property>
    </widget>
   </widget>
+  <widget class="QPushButton" name="back2">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>360</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </widget>
+  <zorder>browse3</zorder>
+  <zorder>rules</zorder>
+  <zorder>lab2</zorder>
+  <zorder>new_game</zorder>
+  <zorder>bot_path2</zorder>
+  <zorder>label</zorder>
+  <zorder>back1</zorder>
+  <zorder>start</zorder>
+  <zorder>browse2</zorder>
+  <zorder>load_game</zorder>
+  <zorder>bot_path1</zorder>
+  <zorder>browse1</zorder>
+  <zorder>load_path</zorder>
+  <zorder>back2</zorder>
+  <zorder>load_game2</zorder>
+  <zorder>groupBox</zorder>
+  <zorder>groupBox_2</zorder>
+  <zorder>back2</zorder>
  </widget>
  <resources/>
  <connections/>

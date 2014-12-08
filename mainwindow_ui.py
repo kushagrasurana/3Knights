@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'G:\Coding\Python\PyQtTest\mainwindow_ui.ui'
+# Form implementation generated from reading ui file 'G:\Coding\Python\3Knights\mainwindow_ui.ui'
 #
-# Created: Sun Dec  7 23:02:22 2014
+# Created: Mon Dec  8 01:48:21 2014
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,12 +13,6 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(517, 431)
-        self.browse3 = QtWidgets.QPushButton(Form)
-        self.browse3.setGeometry(QtCore.QRect(310, 270, 75, 23))
-        self.browse3.setObjectName("browse3")
-        self.rules = QtWidgets.QPushButton(Form)
-        self.rules.setGeometry(QtCore.QRect(200, 300, 75, 23))
-        self.rules.setObjectName("rules")
         self.lab2 = QtWidgets.QLabel(Form)
         self.lab2.setGeometry(QtCore.QRect(60, 70, 46, 13))
         self.lab2.setObjectName("lab2")
@@ -31,9 +25,6 @@ class Ui_Form(object):
         self.label = QtWidgets.QLabel(Form)
         self.label.setGeometry(QtCore.QRect(220, 0, 41, 16))
         self.label.setObjectName("label")
-        self.back1 = QtWidgets.QPushButton(Form)
-        self.back1.setGeometry(QtCore.QRect(200, 330, 75, 23))
-        self.back1.setObjectName("back1")
         self.start = QtWidgets.QPushButton(Form)
         self.start.setGeometry(QtCore.QRect(200, 180, 75, 23))
         self.start.setObjectName("start")
@@ -52,9 +43,6 @@ class Ui_Form(object):
         self.load_path = QtWidgets.QLineEdit(Form)
         self.load_path.setGeometry(QtCore.QRect(180, 270, 113, 20))
         self.load_path.setObjectName("load_path")
-        self.back2 = QtWidgets.QPushButton(Form)
-        self.back2.setGeometry(QtCore.QRect(200, 360, 75, 23))
-        self.back2.setObjectName("back2")
         self.load_game2 = QtWidgets.QPushButton(Form)
         self.load_game2.setGeometry(QtCore.QRect(200, 240, 75, 23))
         self.load_game2.setObjectName("load_game2")
@@ -81,6 +69,27 @@ class Ui_Form(object):
         self.lab3 = QtWidgets.QLabel(self.groupBox_2)
         self.lab3.setGeometry(QtCore.QRect(70, 10, 46, 13))
         self.lab3.setObjectName("lab3")
+        self.widget = QtWidgets.QWidget(Form)
+        self.widget.setGeometry(QtCore.QRect(170, 330, 241, 56))
+        self.widget.setObjectName("widget")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.widget)
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.gridLayout = QtWidgets.QGridLayout()
+        self.gridLayout.setObjectName("gridLayout")
+        self.back1 = QtWidgets.QPushButton(self.widget)
+        self.back1.setObjectName("back1")
+        self.gridLayout.addWidget(self.back1, 1, 1, 1, 1)
+        self.rules = QtWidgets.QPushButton(self.widget)
+        self.rules.setObjectName("rules")
+        self.gridLayout.addWidget(self.rules, 0, 1, 1, 1)
+        self.back2 = QtWidgets.QPushButton(self.widget)
+        self.back2.setObjectName("back2")
+        self.gridLayout.addWidget(self.back2, 0, 0, 1, 1)
+        self.horizontalLayout.addLayout(self.gridLayout)
+        self.browse3 = QtWidgets.QPushButton(self.widget)
+        self.browse3.setObjectName("browse3")
+        self.horizontalLayout.addWidget(self.browse3)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -88,21 +97,21 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.browse3.setText(_translate("Form", "Browse"))
-        self.rules.setText(_translate("Form", "Rules"))
         self.lab2.setText(_translate("Form", "Player 1"))
         self.new_game.setText(_translate("Form", "New Game"))
         self.label.setText(_translate("Form", "3Knights"))
-        self.back1.setText(_translate("Form", "Back"))
         self.start.setText(_translate("Form", "Start"))
         self.browse2.setText(_translate("Form", "Browse"))
         self.load_game.setText(_translate("Form", "Load Game"))
         self.browse1.setText(_translate("Form", "Browse"))
-        self.back2.setText(_translate("Form", "Back"))
         self.load_game2.setText(_translate("Form", "Load Game"))
         self.rb1.setText(_translate("Form", "Bot"))
         self.rb2.setText(_translate("Form", "Human"))
         self.rb3.setText(_translate("Form", "Bot"))
         self.rb4.setText(_translate("Form", "Human"))
         self.lab3.setText(_translate("Form", "Player 2"))
+        self.back1.setText(_translate("Form", "Back"))
+        self.rules.setText(_translate("Form", "Rules"))
+        self.back2.setText(_translate("Form", "Back"))
+        self.browse3.setText(_translate("Form", "Browse"))
 
