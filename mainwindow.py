@@ -30,6 +30,9 @@ class MainWindow(QWidget):
         self.ui.load_path.hide()
         self.ui.back1.hide()
         self.ui.back2.hide()
+        self.ui.start.hide()
+        self.ui.groupBox.hide()
+        self.ui.groupBox_2.hide()
         # connects
         self.ui.new_game.clicked.connect(self.new_game_clicked)
         self.ui.browse1.clicked.connect(self.browse1_clicked)
@@ -54,6 +57,10 @@ class MainWindow(QWidget):
         self.ui.browse1.show()
         self.ui.browse2.show()
         self.ui.back1.show()
+        self.ui.start.show()
+        self.ui.groupBox_2.show()
+        self.ui.groupBox.show()
+        self.back2_clicked()
 
     def browse1_clicked(self):
         self.ui.bot_path1.setText(QFileDialog.getOpenFileName()[0])
@@ -65,6 +72,7 @@ class MainWindow(QWidget):
         pass
 
     def load_game_clicked(self):
+        self.back1_clicked()
         self.ui.load_path.show()
         self.ui.browse3.show()
         self.ui.back2.show()
@@ -92,6 +100,9 @@ class MainWindow(QWidget):
         self.ui.browse1.hide()
         self.ui.browse2.hide()
         self.ui.back1.hide()
+        self.ui.start.hide()
+        self.ui.groupBox_2.hide()
+        self.ui.groupBox.hide()
 
     def back2_clicked(self):
         self.ui.back2.hide()
