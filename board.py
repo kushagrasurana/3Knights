@@ -20,7 +20,8 @@ class Board(QGridLayout):
             for j in range(0, 8):
                 self.tile[i].append(MyLabel())
                 self.tile[i][j].setGeometry(QtCore.QRect(0, 0, 50, 50))
-                self.tile[i][j].setObjectName(str(i) + "," + str(j))
+                self.tile[i][j].i=i
+                self.tile[i][j].j=j
                 if alt > 0:
                     self.tile[i][j].setStyleSheet(
                         "background-color :qlineargradient(spread:pad, x1:0.489, y1:1, x2:0.512, y2:0, stop:0 rgba(40, 40, 40, 246), stop:1 rgba(145, 145, 145, 255));border: 1px solid black;")
@@ -35,33 +36,48 @@ class Board(QGridLayout):
         if code == 0:  # king
             if col == 0:
                 self.tile[x][y].change_pixmap("/images/BK.png")
+                self.tile[x][y].piece=0
             else:
                 self.tile[x][y].change_pixmap("/images/WK.png")
+                self.tile[x][y].piece=10
         elif code == 1:  # queen
             if col == 0:
                 self.tile[x][y].change_pixmap("/images/BQ.png")
+                self.tile[x][y].piece=1
             else:
                 self.tile[x][y].change_pixmap("/images/WQ.png")
+                self.tile[x][y].piece=11
         elif code == 2:  # bishop
             if col == 0:
                 self.tile[x][y].change_pixmap("/images/BB.png")
+                self.tile[x][y].piece=2
             else:
                 self.tile[x][y].change_pixmap("/images/WB.png")
+                self.tile[x][y].piece=12
         elif code == 3:  # knight
             if col == 0:
                 self.tile[x][y].change_pixmap("/images/BT.png")
+                self.tile[x][y].piece=3
             else:
                 self.tile[x][y].change_pixmap("/images/WT.png")
+                self.tile[x][y].piece=13
         elif code == 4:  # rook
             if col == 0:
                 self.tile[x][y].change_pixmap("/images/BR.png")
+                self.tile[x][y].piece=4
             else:
                 self.tile[x][y].change_pixmap("/images/WR.png")
+                self.tile[x][y].piece=14
         elif code == 5:  # pawn
             if col == 0:
                 self.tile[x][y].change_pixmap("/images/BP.png")
+                self.tile[x][y].piece=5
             else:
                 self.tile[x][y].change_pixmap("/images/WP.png")
+                self.tile[x][y].piece=15
 
     def remove_piece(self,x,y):
+        print("removed from ",x,y)
         self.tile[x][y].pixmap = None
+        self.tile[x][y].repaint()
+        self.tile[x][y].piece = -1

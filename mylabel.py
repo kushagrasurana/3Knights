@@ -2,12 +2,18 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt
+from PyQt5.QtCore import pyqtSignal,pyqtSlot
 import os
 
 
 class MyLabel(QLabel):
+    clickedk = pyqtSignal(int,int)
     def __init__(self, img=None):
         super(MyLabel, self).__init__()
+        self.piece=-1 #stores piece number
+        self.i=0 #stores x coordinate of this label on grid layout
+        self.j=0 #stores y coordinate
+
         if img is not None:
             self.pixmap = QPixmap(os.getcwd() + img)
         else:
@@ -29,3 +35,6 @@ class MyLabel(QLabel):
     def change_pixmap(self, img):
         self.pixmap = QPixmap(os.getcwd() + img)
         self.repaint()
+
+    def mousePressEvent(self, QMouseEvent):
+        self.clickedk.emit(self.i,self.j)
