@@ -34,9 +34,11 @@ class MyGame(QWidget):
             if (self.game_board.tile[i][j].piece > 5 and self.whites_move == 1) or (self.game_board.tile[i][j].piece < 6 and self.game_board.tile[i][j].piece != -1 and self.whites_move == 0):
                 self.selected_i = i
                 self.selected_j = j
+                self.change_style(i,j,1)
         elif self.selected_i == i and self.selected_j == j:
             self.selected_i = None
             self.selected_j = None
+            self.change_style(i,j,0)
         else:
             if (i, j) in self.possible_moves(self.selected_i, self.selected_j,self.game_board.tile[self.selected_i][self.selected_j].piece):
                 print(i, j, "in move list")  # working
@@ -45,6 +47,7 @@ class MyGame(QWidget):
                 col = self.get_col(piece)
                 self.game_board.remove_piece(self.selected_i, self.selected_j)
                 self.game_board.set_piece(code, col, i, j)
+                self.change_style(self.selected_i,self.selected_j,0)
                 self.selected_i = None
                 self.selected_j = None
                 if self.whites_move == 1:
@@ -75,8 +78,6 @@ class MyGame(QWidget):
             return self.queen_movelist(i, j, col)
         else:
             return self.king_movelist(i, j, col)
-        move_list = [(1, 1), (2, 2)]
-        return move_list
 
     def get_code(self,piece):
         return piece % 10
@@ -186,10 +187,87 @@ class MyGame(QWidget):
             pass
 
     def bishop_movelist(self,i, j, col):
+        movelist = []
         if col == 1:
-            pass
+            # for north east
+            tempi=i-1
+            tempj=j+1
+            print(tempi,tempj)
+            while(tempi>=0 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi-=1
+                tempj+=1
+                print("added")
+            if(tempi>=0 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
+                movelist.append((tempi,tempj))
+            # for north west
+            tempi=i-1
+            tempj=j-1
+            while(tempi>=0 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi-=1
+                tempj-=1
+            if(tempi>=0 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
+                movelist.append((tempi,tempj))
+            # south east
+            tempi=i+1
+            tempj=j+1
+            while(tempi<8 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi+=1
+                tempj+=1
+            if(tempi<8 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
+                movelist.append((tempi,tempj))
+            # south west
+            tempi=i+1
+            tempj=j-1
+            while(tempi<8 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi+=1
+                tempj-=1
+            if(tempi<8 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
+                movelist.append((tempi,tempj))
         else:
-            pass
+            # for north east
+            tempi=i-1
+            tempj=j+1
+            print(tempi,tempj)
+            while(tempi>=0 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi-=1
+                tempj+=1
+                print("added")
+            if(tempi>=0 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
+                movelist.append((tempi,tempj))
+            # for north west
+            tempi=i-1
+            tempj=j-1
+            while(tempi>=0 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi-=1
+                tempj-=1
+            if(tempi>=0 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
+                movelist.append((tempi,tempj))
+            # south east
+            tempi=i+1
+            tempj=j+1
+            while(tempi<8 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi+=1
+                tempj+=1
+            if(tempi<8 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
+                movelist.append((tempi,tempj))
+            # south west
+            tempi=i+1
+            tempj=j-1
+            while(tempi<8 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
+                movelist.append((tempi,tempj))
+                tempi+=1
+                tempj-=1
+            if(tempi<8 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
+                movelist.append((tempi,tempj))
+        print(movelist)
+        return movelist
 
     def queen_movelist(self,i, j, col):
         if col == 1:
@@ -202,3 +280,23 @@ class MyGame(QWidget):
             pass
         else:
             pass
+
+    def change_style(self,i,j,change):
+        if((i+j)%2==0):
+            tile_color = 1
+        else:
+            tile_color = 0 # black
+        if change==1:
+            if(tile_color == 0):
+                self.game_board.tile[i][j].setStyleSheet("QLabel{background-color :qlineargradient(spread:pad, x1:0.489, y1:1, x2:0.512, y2:0, stop:0 rgba(40, 40, 40, 246), stop:1 rgba(145, 145, 145, 255));border: 1px solid black;}QLabel { border: 2px solid qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(0, 255, 191, 51), stop:0.1 rgba(0, 255, 234, 255), stop:0.409091 rgba(1, 255, 223, 92), stop:0.6 rgba(180, 255, 240, 84), stop:1 rgba(76, 218, 255, 205))}")
+            else:
+                self.game_board.tile[i][j].setStyleSheet("QLabel{background-color :qlineargradient(spread:pad, x1:0.506, y1:0.977273, x2:0.512, y2:0, stop:0 rgba(214, 214, 214, 246), stop:1 rgba(255, 255, 255, 255));border: 1px solid black}QLabel { border: 2px solid qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(0, 255, 191, 51), stop:0.1 rgba(0, 255, 234, 255), stop:0.409091 rgba(1, 255, 223, 92), stop:0.6 rgba(180, 255, 240, 84), stop:1 rgba(76, 218, 255, 205))}")
+        else:
+            print("reverting")
+            if(tile_color == 0):
+                self.game_board.tile[i][j].setStyleSheet("QLabel{background-color :qlineargradient(spread:pad, x1:0.489, y1:1, x2:0.512, y2:0, stop:0 rgba(40, 40, 40, 246), stop:1 rgba(145, 145, 145, 255));border: 1px solid black;}QLabel:hover { border: 2px solid qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(255, 125, 125, 51), stop:0.1 rgba(255, 0, 0, 255), stop:0.409091 rgba(255, 151, 151, 92), stop:0.6 rgba(255, 180, 180, 84), stop:1 rgba(255, 76, 76, 205))}")
+            else:
+                self.game_board.tile[i][j].setStyleSheet("QLabel{background-color :qlineargradient(spread:pad, x1:0.506, y1:0.977273, x2:0.512, y2:0, stop:0 rgba(214, 214, 214, 246), stop:1 rgba(255, 255, 255, 255));border: 1px solid black}QLabel:hover { border: 2px solid qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(255, 125, 125, 51), stop:0.1 rgba(255, 0, 0, 255), stop:0.409091 rgba(255, 151, 151, 92), stop:0.6 rgba(255, 180, 180, 84), stop:1 rgba(255, 76, 76, 205))}")
+
+
+
