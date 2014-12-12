@@ -83,7 +83,7 @@ class MainWindow(QWidget):
         pass
 
     def browse3_clicked(self):
-        self.ui.bot_path3.setText(QFileDialog.getOpenFileName()[0])
+        self.ui.load_path.setText(QFileDialog.getOpenFileName()[0])
 
     def rules_clicked(self):
         pass

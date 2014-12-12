@@ -1,22 +1,48 @@
+import os
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from board import Board
 
 
 class MyGame(QWidget):
-    def __init__(self, new_game=1):
+    def __init__(self, new_game=1,file_path=""):
         super(MyGame, self).__init__()
         self.whites_move = 1
         self.selected_i = None
         self.selected_j = None
         self.score_white=0
         self.score_black=0
-        if new_game == 1:
-            self.initUI()
-        else:
-            pass
+        self.move_history = []
+        self.file_path = file_path
+        self.initUI()
+        if new_game == 0:
+            self.load_game()
 
     def initUI(self):
         self.game_board = Board()
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.p1_score = QtWidgets.QLabel()
+        self.p1_score.setObjectName("p1_score")
+        self.horizontalLayout.addWidget(self.p1_score)
+        self.undo = QtWidgets.QPushButton()
+        self.undo.setObjectName("undo")
+        self.horizontalLayout.addWidget(self.undo)
+        self.save = QtWidgets.QPushButton()
+        self.save.setObjectName("save")
+        self.horizontalLayout.addWidget(self.save)
+        self.back = QtWidgets.QPushButton()
+        self.back.setObjectName("back")
+        self.horizontalLayout.addWidget(self.back)
+        self.p2_score = QtWidgets.QLabel()
+        self.p2_score.setObjectName("p2_score")
+        self.horizontalLayout.addWidget(self.p2_score)
+        self.p1_score.setText( "Player1-0")
+        self.undo.setText("Undo")
+        self.save.setText("Save")
+        self.back.setText("Back")
+        self.p2_score.setText("Player2-0")
         for i in range(0, 8):
             self.game_board.set_piece(5, 0, 1, i)
             self.game_board.set_piece(5, 1, 6, i)
@@ -27,7 +53,10 @@ class MyGame(QWidget):
         for i in range(0, 8):
             for j in range(0, 8):
                 self.game_board.tile[i][j].clickedk.connect(self.board_clicked)
+        self.game_board.addLayout(self.horizontalLayout,8,0,1,8)
         self.setLayout(self.game_board)
+        self.undo.clicked.connect(self.undo_move)
+        self.save.clicked.connect(self.save_button)
 
     def board_clicked(self, i, j):
         if self.selected_i is None:
@@ -42,6 +71,13 @@ class MyGame(QWidget):
         else:
             if (i, j) in self.possible_moves(self.selected_i, self.selected_j,self.game_board.tile[self.selected_i][self.selected_j].piece):
                 print(i, j, "in move list")  # working
+                if(self.game_board.tile[i][j].piece!=-1): # already a piece there
+                    temp_move = (chr(self.selected_j+97)+chr(8-self.selected_i+48)+chr(j+97)+chr(8-i+48)+'x'+chr(self.game_board.tile[i][j].piece+48))
+                else:
+                    temp_move = (chr(self.selected_j+97)+chr(8-self.selected_i+48)+chr(j+97)+chr(8-i+48))
+                self.move_history.append(temp_move)
+                self.undo.setEnabled(True)
+                print ("move=",temp_move)
                 piece = self.game_board.tile[self.selected_i][self.selected_j].piece
                 code = self.get_code(piece)
                 col = self.get_col(piece)
@@ -58,10 +94,14 @@ class MyGame(QWidget):
                     self.score_white+=1
                     print("white increase")
                     self.game_board.remove_piece(i,j)
+                    current_score1=ord(self.p1_score.text()[-1])
+                    self.p1_score.setText("Player1-"+chr(current_score1+1))
                 if(code==5 and i==7 and col==0):
                     self.score_black+=1
                     print("black increase")
                     self.game_board.remove_piece(i,j)
+                    current_score2=ord(self.p2_score.text()[-1])
+                    self.p2_score.setText("Player1-"+chr(current_score2+1))
 
     def possible_moves(self, i, j, piece):
         code = self.get_code(piece)
@@ -297,6 +337,66 @@ class MyGame(QWidget):
                 self.game_board.tile[i][j].setStyleSheet("QLabel{background-color :qlineargradient(spread:pad, x1:0.489, y1:1, x2:0.512, y2:0, stop:0 rgba(40, 40, 40, 246), stop:1 rgba(145, 145, 145, 255));border: 1px solid black;}QLabel:hover { border: 2px solid qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(255, 125, 125, 51), stop:0.1 rgba(255, 0, 0, 255), stop:0.409091 rgba(255, 151, 151, 92), stop:0.6 rgba(255, 180, 180, 84), stop:1 rgba(255, 76, 76, 205))}")
             else:
                 self.game_board.tile[i][j].setStyleSheet("QLabel{background-color :qlineargradient(spread:pad, x1:0.506, y1:0.977273, x2:0.512, y2:0, stop:0 rgba(214, 214, 214, 246), stop:1 rgba(255, 255, 255, 255));border: 1px solid black}QLabel:hover { border: 2px solid qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(255, 125, 125, 51), stop:0.1 rgba(255, 0, 0, 255), stop:0.409091 rgba(255, 151, 151, 92), stop:0.6 rgba(255, 180, 180, 84), stop:1 rgba(255, 76, 76, 205))}")
+
+    def undo_move(self):
+        if self.whites_move == 1:
+            self.whites_move =0
+        else:
+            self.whites_move = 1
+        last_move = self.move_history[-1]
+        self.move_history.pop()
+        current_i=8-(ord(last_move[3])-48)
+        current_j=ord(last_move[2])-97
+        previous_i=8-(ord(last_move[1])-48)
+        previous_j=ord(last_move[0])-97
+        piece=self.game_board.tile[current_i][current_j].piece
+        self.game_board.set_piece(self.get_code(piece),self.get_col(piece),previous_i,previous_j)
+        self.game_board.remove_piece(current_i,current_j)
+        if 'x' in last_move:
+            old_piece=ord(last_move[5])-48
+            print(old_piece)
+            self.game_board.set_piece(self.get_code(old_piece),self.get_col(old_piece),current_i,current_j)
+        if len(self.move_history)==0:
+            self.undo.setDisabled(True)
+
+    def save_button(self):
+        file_name = QFileDialog.getSaveFileName(self, 'Save File', os.getcwd())[0]
+        FILE = open(file_name,"w")
+        # save who's turn is next
+        FILE.write("%s\n" %chr(self.whites_move+48))
+        # save all moves
+        for item in self.move_history:
+            FILE.write("%s " % item)
+        FILE.write("\n")
+        # save scores
+        FILE.write("%s %s" % ( self.p1_score.text(),self.p2_score.text()))
+        FILE.close()
+
+    def load_game(self):
+        print("file path = %s"%self.file_path)
+        FILE = open(self.file_path,'r')
+        line = FILE.readline()
+        self.whites_move = ord(line[0])-48
+        line = FILE.readline()
+        print("move list in line =%s"%line)
+        self.move_history = line.split(' ')
+        self.move_history.pop()
+        print("move history = %s" % self.move_history)
+        # make moves to current state of game
+        for move in self.move_history:
+            self.make_move(move)
+        line = FILE.readline()
+        self.p1_score.setText(line.split(' ')[0])
+        self.p2_score.setText(line.split(' ')[1])
+
+    def make_move(self,move):
+        current_i=8-(ord(move[1])-48)
+        current_j=ord(move[0])-97
+        final_i=8-(ord(move[3])-48)
+        final_j=ord(move[2])-97
+        piece = self.game_board.tile[current_i][current_j].piece
+        self.game_board.remove_piece(current_i,current_j)
+        self.game_board.set_piece(self.get_code(piece),self.get_col(piece),final_i,final_j)
 
 
 
