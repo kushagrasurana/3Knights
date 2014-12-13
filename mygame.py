@@ -350,6 +350,11 @@ class MyGame(QWidget):
         previous_i=8-(ord(last_move[1])-48)
         previous_j=ord(last_move[0])-97
         piece=self.game_board.tile[current_i][current_j].piece
+        if(piece==-1):
+            if(current_i==0): # white pawn is promoted
+                piece=15
+            else:
+                piece=5
         self.game_board.set_piece(self.get_code(piece),self.get_col(piece),previous_i,previous_j)
         self.game_board.remove_piece(current_i,current_j)
         if 'x' in last_move:

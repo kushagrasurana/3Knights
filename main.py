@@ -21,10 +21,12 @@ class Window(QMainWindow):
     def change_central_widget2(self):
         self.mainWidget = MainWindow()
         self.mainWidget.ui.start.clicked.connect(self.change_central_widget)
+        self.mainWidget.ui.load_game2.clicked.connect(self.change_central_widget3)
         self.setCentralWidget(self.mainWidget)
 
     def change_central_widget3(self):
         new_game = 0
+        print("loading")
         file_path = self.mainWidget.ui.load_path.text()
         self.gameWidget = MyGame(new_game,file_path)
         self.setCentralWidget(self.gameWidget)
