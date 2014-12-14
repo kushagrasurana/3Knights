@@ -5,7 +5,7 @@ from board import Board
 
 
 class MyGame(QWidget):
-    def __init__(self, new_game=1,file_path=""):
+    def __init__(self, new_game=1,file_path="",bot1_path="",bot2_path=""):
         super(MyGame, self).__init__()
         self.whites_move = 1
         self.selected_i = None
@@ -14,6 +14,8 @@ class MyGame(QWidget):
         self.score_black=0
         self.move_history = []
         self.file_path = file_path
+        self.bot1_path = bot1_path
+        self.bot2_path = bot2_path
         self.initUI()
         if new_game == 0:
             self.load_game()
@@ -101,7 +103,7 @@ class MyGame(QWidget):
                     print("black increase")
                     self.game_board.remove_piece(i,j)
                     current_score2=ord(self.p2_score.text()[-1])
-                    self.p2_score.setText("Player1-"+chr(current_score2+1))
+                    self.p2_score.setText("Player2-"+chr(current_score2+1))
 
     def possible_moves(self, i, j, piece):
         code = self.get_code(piece)
@@ -159,153 +161,123 @@ class MyGame(QWidget):
 
     def rook_movelist(self,i, j, col):
         movelist = []
-        if col == 1:
-            # first for left direction
-            tempj=j-1
-            while(tempj>=0 and self.game_board.tile[i][tempj].piece==-1):
-                movelist.append((i,tempj))
-                tempj-=1
-            if(tempj>=0 and self.get_col(self.game_board.tile[i][tempj].piece)==0 ): #kill
-                movelist.append((i,tempj))
-            # for right direction
-            tempj=j+1
-            while(tempj<8 and self.game_board.tile[i][tempj].piece==-1):
-                movelist.append((i,tempj))
-                tempj+=1
-            if(tempj<8 and self.get_col(self.game_board.tile[i][tempj].piece)==0 ): #kill
-                movelist.append((i,tempj))
-            # for down
-            tempi=i+1
-            while tempi<8 and self.game_board.tile[tempi][j].piece==-1:
-                movelist.append((tempi,j))
-                tempi+=1
-            if(tempi<8 and self.get_col(self.game_board.tile[tempi][j].piece)==0 ): #kill
-                movelist.append((tempi,j))
-            # for up
-            tempi=i-1
-            while tempi>=0 and self.game_board.tile[tempi][j].piece==-1:
-                movelist.append((tempi,j))
-                tempi-=1
-            if(tempi>=0 and self.get_col(self.game_board.tile[tempi][j].piece)==0 ): #kill
-                movelist.append((tempi,j))
+        tempj=j-1
+        if col==1:
+            col=0
         else:
-            # first for left direction
-            tempj=j-1
-            while(tempj>=0 and self.game_board.tile[i][tempj].piece==-1):
-                movelist.append((i,tempj))
-                tempj-=1
-            if(tempj>=0 and self.get_col(self.game_board.tile[i][tempj].piece)==1 ): #kill
-                movelist.append((i,tempj))
-            # for right direction
-            tempj=j+1
-            while(tempj<8 and self.game_board.tile[i][tempj].piece==-1):
-                movelist.append((i,tempj))
-                tempj+=1
-            if(tempj<8 and self.get_col(self.game_board.tile[i][tempj].piece)==1 ): #kill
-                movelist.append((i,tempj))
-            # for down
-            tempi=i+1
-            while tempi<8 and self.game_board.tile[tempi][j].piece==-1:
-                movelist.append((tempi,j))
-                tempi+=1
-            if(tempi<8 and self.get_col(self.game_board.tile[tempi][j].piece)==1 ): #kill
-                movelist.append((tempi,j))
-            # for up
-            tempi=i-1
-            while tempi>=0 and self.game_board.tile[tempi][j].piece==-1:
-                movelist.append((tempi,j))
-                tempi-=1
-            if(tempi>=0 and self.get_col(self.game_board.tile[tempi][j].piece)==1 ): #kill
-                movelist.append((tempi,j))
+            col=1
+        while(tempj>=0 and self.game_board.tile[i][tempj].piece==-1):
+            movelist.append((i,tempj))
+            tempj-=1
+        if(tempj>=0 and self.get_col(self.game_board.tile[i][tempj].piece)==col ): #kill
+            movelist.append((i,tempj))
+        # for right direction
+        tempj=j+1
+        while(tempj<8 and self.game_board.tile[i][tempj].piece==-1):
+            movelist.append((i,tempj))
+            tempj+=1
+        if(tempj<8 and self.get_col(self.game_board.tile[i][tempj].piece)==col ): #kill
+            movelist.append((i,tempj))
+        # for down
+        tempi=i+1
+        while tempi<8 and self.game_board.tile[tempi][j].piece==-1:
+            movelist.append((tempi,j))
+            tempi+=1
+        if(tempi<8 and self.get_col(self.game_board.tile[tempi][j].piece)==col): #kill
+            movelist.append((tempi,j))
+        # for up
+        tempi=i-1
+        while tempi>=0 and self.game_board.tile[tempi][j].piece==-1:
+            movelist.append((tempi,j))
+            tempi-=1
+        if(tempi>=0 and self.get_col(self.game_board.tile[tempi][j].piece)==col ): #kill
+            movelist.append((tempi,j))
         print(movelist)
         return movelist
 
     def knight_movelist(self,i, j, col):
-        if col == 1:
-            pass
+        movelist = []
+        # west i.e j+=2
+        if col==1:
+            col=0
         else:
-            pass
+            col=1
+        if j+2<8:
+            if i-1>0:
+                if self.get_col(self.game_board.tile[i-1][j+2].piece)==col or self.game_board.tile[i-1][j+2].piece == -1:
+                    movelist.append((i-1,j+2))
+            if i+1<8:
+                if self.get_col(self.game_board.tile[i+1][j+2].piece)==col or self.game_board.tile[i+1][j+2].piece == -1:
+                    movelist.append((i-1,j+2))
+        # east j-=2
+        if j-2>0:
+            if i-1>0:
+                if self.get_col(self.game_board.tile[i-1][j-2].piece)==col or self.game_board.tile[i-1][j-2].piece == -1:
+                    movelist.append((i-1,j+2))
+            if i+1<8:
+                if self.get_col(self.game_board.tile[i+1][j-2].piece)==col or self.game_board.tile[i+1][j-2].piece == -1:
+                    movelist.append((i-1,j+2))
+        # south i-=2
+        if i+2<8:
+            if j-1>0:
+                if self.get_col(self.game_board.tile[i+2][j-1].piece)==col or self.game_board.tile[i+2][j-1].piece == -1:
+                    movelist.append((i-1,j+2))
+            if j+1<8:
+                if self.get_col(self.game_board.tile[i+2][j+1].piece)==col or self.game_board.tile[i+2][j+1].piece == -1:
+                    movelist.append((i-1,j+2))
+        # north i-2
+        if i-2>0:
+            if j-1>0:
+                if self.get_col(self.game_board.tile[i-2][j-1].piece)==col or self.game_board.tile[i-2][j-1].piece == -1:
+                    movelist.append((i-1,j+2))
+            if j+1<8:
+                if self.get_col(self.game_board.tile[i-2][j+1].piece)==col or self.game_board.tile[i-2][j+1].piece == -1:
+                    movelist.append((i-1,j+2))
 
     def bishop_movelist(self,i, j, col):
         movelist = []
-        if col == 1:
-            # for north east
-            tempi=i-1
-            tempj=j+1
-            print(tempi,tempj)
-            while(tempi>=0 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi-=1
-                tempj+=1
-                print("added")
-            if(tempi>=0 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
-                movelist.append((tempi,tempj))
-            # for north west
-            tempi=i-1
-            tempj=j-1
-            while(tempi>=0 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi-=1
-                tempj-=1
-            if(tempi>=0 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
-                movelist.append((tempi,tempj))
-            # south east
-            tempi=i+1
-            tempj=j+1
-            while(tempi<8 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi+=1
-                tempj+=1
-            if(tempi<8 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
-                movelist.append((tempi,tempj))
-            # south west
-            tempi=i+1
-            tempj=j-1
-            while(tempi<8 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi+=1
-                tempj-=1
-            if(tempi<8 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==0): # kill
-                movelist.append((tempi,tempj))
+        if col==1:
+            col=0
         else:
-            # for north east
-            tempi=i-1
-            tempj=j+1
-            print(tempi,tempj)
-            while(tempi>=0 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi-=1
-                tempj+=1
-                print("added")
-            if(tempi>=0 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
-                movelist.append((tempi,tempj))
-            # for north west
-            tempi=i-1
-            tempj=j-1
-            while(tempi>=0 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi-=1
-                tempj-=1
-            if(tempi>=0 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
-                movelist.append((tempi,tempj))
-            # south east
-            tempi=i+1
-            tempj=j+1
-            while(tempi<8 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi+=1
-                tempj+=1
-            if(tempi<8 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
-                movelist.append((tempi,tempj))
-            # south west
-            tempi=i+1
-            tempj=j-1
-            while(tempi<8 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
-                movelist.append((tempi,tempj))
-                tempi+=1
-                tempj-=1
-            if(tempi<8 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==1): # kill
-                movelist.append((tempi,tempj))
+            col=1
+        # for north east
+        tempi=i-1
+        tempj=j+1
+        print(tempi,tempj)
+        while(tempi>=0 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
+            movelist.append((tempi,tempj))
+            tempi-=1
+            tempj+=1
+            print("added")
+        if(tempi>=0 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==col): # kill
+            movelist.append((tempi,tempj))
+        # for north west
+        tempi=i-1
+        tempj=j-1
+        while(tempi>=0 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
+            movelist.append((tempi,tempj))
+            tempi-=1
+            tempj-=1
+        if(tempi>=0 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==col): # kill
+            movelist.append((tempi,tempj))
+        # south east
+        tempi=i+1
+        tempj=j+1
+        while(tempi<8 and tempj<8 and self.game_board.tile[tempi][tempj].piece==-1):
+            movelist.append((tempi,tempj))
+            tempi+=1
+            tempj+=1
+        if(tempi<8 and tempj<8 and self.get_col(self.game_board.tile[tempi][tempj].piece)==col): # kill
+            movelist.append((tempi,tempj))
+        # south west
+        tempi=i+1
+        tempj=j-1
+        while(tempi<8 and tempj>=0 and self.game_board.tile[tempi][tempj].piece==-1):
+            movelist.append((tempi,tempj))
+            tempi+=1
+            tempj-=1
+        if(tempi<8 and tempj>=0 and self.get_col(self.game_board.tile[tempi][tempj].piece)==col): # kill
+            movelist.append((tempi,tempj))
         print(movelist)
         return movelist
 
@@ -321,7 +293,7 @@ class MyGame(QWidget):
         else:
             pass
 
-    def change_style(self,i,j,change):
+    def change_style(self,i,j,change): # changes color of tile when a piece is selected
         if((i+j)%2==0):
             tile_color = 1
         else:
@@ -343,6 +315,11 @@ class MyGame(QWidget):
             self.whites_move =0
         else:
             self.whites_move = 1
+        if self.selected_i is not None: # check if a piece is selected, reverts back if selected
+            self.change_style(self.selected_i,self.selected_j,0)
+            self.selected_i=None
+            self.selected_j=None
+
         last_move = self.move_history[-1]
         self.move_history.pop()
         current_i=8-(ord(last_move[3])-48)
@@ -353,8 +330,14 @@ class MyGame(QWidget):
         if(piece==-1):
             if(current_i==0): # white pawn is promoted
                 piece=15
+                self.score_white-=1
+                current_score1=ord(self.p1_score.text()[-1])
+                self.p1_score.setText("Player1-"+chr(current_score1-1))
             else:
                 piece=5
+                self.score_black-=1
+                current_score2=ord(self.p2_score.text()[-1])
+                self.p2_score.setText("Player2-"+chr(current_score2-1))
         self.game_board.set_piece(self.get_code(piece),self.get_col(piece),previous_i,previous_j)
         self.game_board.remove_piece(current_i,current_j)
         if 'x' in last_move:
@@ -401,7 +384,10 @@ class MyGame(QWidget):
         final_j=ord(move[2])-97
         piece = self.game_board.tile[current_i][current_j].piece
         self.game_board.remove_piece(current_i,current_j)
-        self.game_board.set_piece(self.get_code(piece),self.get_col(piece),final_i,final_j)
+        if (piece==5 or piece==15) and (final_i==0 or final_i==7):
+            pass
+        else:
+            self.game_board.set_piece(self.get_code(piece),self.get_col(piece),final_i,final_j)
 
 
 

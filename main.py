@@ -14,7 +14,19 @@ class Window(QMainWindow):
         self.setCentralWidget(self.mainWidget)
 
     def change_central_widget(self):
-        self.gameWidget = MyGame()
+        if self.mainWidget.ui.rb1.isChecked():
+            if self.mainWidget.ui.rb3.isChecked(): # bot vs bot
+                if (self.mainWidget.ui.bot_path1.text()=="" or self.mainWidget.ui.bot_path2.text()==""):
+                    pass # dialog for null
+                self.gameWidget = MyGame(1,"",self.mainWidget.ui.bot_path1.text(),self.mainWidget.ui.bot_path2.text())
+            else:
+                self.gameWidget = MyGame(1,"",self.mainWidget.ui.bot_path1.text()) # bot vs human
+        else:
+            if self.mainWidget.ui.rb3.isChecked():
+                self.gameWidget = MyGame(1,"","",self.mainWidget.ui.bot_path2.text()) # human vs bot
+            else:
+                self.gameWidget = MyGame() # human vs human
+
         self.setCentralWidget(self.gameWidget)
         self.gameWidget.back.clicked.connect(self.change_central_widget2)
 
@@ -28,9 +40,12 @@ class Window(QMainWindow):
         new_game = 0
         print("loading")
         file_path = self.mainWidget.ui.load_path.text()
-        self.gameWidget = MyGame(new_game,file_path)
-        self.setCentralWidget(self.gameWidget)
-        self.gameWidget.back.clicked.connect(self.change_central_widget2)
+        if (file_path == ""):
+            pass
+        else:
+            self.gameWidget = MyGame(new_game,file_path)
+            self.setCentralWidget(self.gameWidget)
+            self.gameWidget.back.clicked.connect(self.change_central_widget2)
 
 def main():
     app = QApplication(sys.argv)
