@@ -1,8 +1,13 @@
+#!/usr/bin/env python3
 import sys
-from mainwindow import MainWindow
-from mygame import MyGame
+
 from PyQt5.QtWidgets import *
 
+from mainwindow import MainWindow
+from mygame import MyGame
+
+
+__author__ = "Kushagra Surana"
 
 class Window(QMainWindow):
 

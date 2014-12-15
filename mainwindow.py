@@ -1,5 +1,5 @@
-from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+
 from mainwindow_ui import Ui_Form
 
 
