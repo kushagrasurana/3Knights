@@ -20,7 +20,7 @@ class Board(QGridLayout):
             self.tile.append([])
             for j in range(0, 8):
                 self.tile[i].append(MyLabel())
-                self.tile[i][j].setGeometry(QtCore.QRect(0, 0, 50, 50))
+                self.tile[i][j].setGeometry(QtCore.QRect(0, 0, 200, 200))
                 self.tile[i][j].i=i
                 self.tile[i][j].j=j
                 if alt > 0:
@@ -32,6 +32,7 @@ class Board(QGridLayout):
                         "QLabel{background-color :qlineargradient(spread:pad, x1:0.506, y1:0.977273, x2:0.512, y2:0, stop:0 rgba(214, 214, 214, 246), stop:1 rgba(255, 255, 255, 255));border: 1px solid black}QLabel:hover { border: 2px solid qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(255, 125, 125, 51), stop:0.1 rgba(255, 0, 0, 255), stop:0.409091 rgba(255, 151, 151, 92), stop:0.6 rgba(255, 180, 180, 84), stop:1 rgba(255, 76, 76, 205))}")
                     alt += 1
                 self.addWidget(self.tile[i][j], i, j, 1, 1)
+        self.setGeometry(QtCore.QRect(0,0,800,800))
 
     def set_piece(self, code, col, x, y):
         if code == 0:  # king
@@ -78,7 +79,6 @@ class Board(QGridLayout):
                 self.tile[x][y].piece=15
 
     def remove_piece(self,x,y):
-        print("removed from ",x,y)
         self.tile[x][y].pixmap = None
         self.tile[x][y].repaint()
         self.tile[x][y].piece = -1
