@@ -178,7 +178,7 @@ class MyGame(QWidget):
         return piece % 10
 
     @staticmethod
-    def get_col(self, piece):
+    def get_col(piece):
         if piece == -1:
             return -1
         if piece > 5:
@@ -452,6 +452,7 @@ class MyGame(QWidget):
         else:
             pass
 
+    # end of movelists
     def change_style(self, i, j, change):  # changes color of tile when a piece is selected
         if ((i + j) % 2 == 0):
             tile_color = 1
@@ -628,16 +629,22 @@ class MyGame(QWidget):
         if self.white_rook == 0 and self.white_bishop == 0 and self.black_bishop == 0 and self.black_rook == 0:  # check if player is unable to make a move
             pass
 
-    def result(self):  # working
-        self.score_black += self.black_pawn
-        self.p1_score.setText("Player1-" + chr(self.score_white + 48))
-        self.p2_score.setText("Player2-" + chr(self.score_black + 48))
-        if self.score_white > self.score_black:
-            print("white win")
-        elif self.score_white == self.score_black:
-            print("Stalemate")
+    def result(self,dis=0):  # working
+        if dis==1: # white disqualified
+            pass
+        elif dis==2: # black disqualified
+            pass
         else:
-            print("Black Win")
+            self.score_black += self.black_pawn
+            self.p1_score.setText("Player1-" + chr(self.score_white + 48))
+            self.p2_score.setText("Player2-" + chr(self.score_black + 48))
+            if self.score_white > self.score_black:
+                print("white win")
+            elif self.score_white == self.score_black:
+                print("Stalemate")
+            else:
+                print("Black Win")
+
 
     # bot part
     def write_board_file(self):
@@ -670,8 +677,7 @@ class MyGame(QWidget):
         print(current_i, current_j, final_i, final_j)
         piece = self.game_board.tile[current_i][current_j].piece
         print("piece selected=", piece)
-        if not (
-                                                current_i < 8 and current_i >= 0 and final_i < 8 and final_i >= 0 and current_j < 8 and current_j >= 0 and final_j >= 0 and final_j < 8):
+        if not (8 > current_i >= 0 and 8 > final_i >= 0 and 8 > current_j >= 0 and 0 <= final_j < 8):
             return False
         print("2")
         if self.whites_move:
@@ -681,8 +687,7 @@ class MyGame(QWidget):
             print("3")
             if self.get_col(piece) != 0:
                 return False
-        if (final_i, final_j) in self.possible_moves(current_i, current_j,
-                                                     self.game_board.tile[current_i][current_j].piece):
+        if (final_i, final_j) in self.possible_moves(current_i, current_j,self.game_board.tile[current_i][current_j].piece):
             return True
         else:
             return False
@@ -691,7 +696,7 @@ class MyGame(QWidget):
         if self.whites_move:
             if self.white_is_bot:  # get move from bot1
                 bot1_move = self.read_move(self.bot1_path)
-                if (self.validate_move(bot1_move)):
+                if self.validate_move(bot1_move):
                     print("validated true")
                     self.selected_i = 8 - (ord(bot1_move[1]) - 48)
                     self.selected_j = ord(bot1_move[0]) - 97
