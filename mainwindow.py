@@ -61,6 +61,7 @@ class MainWindow(QWidget):
         self.ui.groupBox_2.show()
         self.ui.groupBox.show()
         self.back2_clicked()
+        self.ui.new_game.hide()
 
     def browse1_clicked(self):
         self.ui.bot_path1.setText(QFileDialog.getOpenFileName()[0])
@@ -103,6 +104,7 @@ class MainWindow(QWidget):
         self.ui.start.hide()
         self.ui.groupBox_2.hide()
         self.ui.groupBox.hide()
+        self.ui.new_game.show()
 
     def back2_clicked(self):
         self.ui.back2.hide()

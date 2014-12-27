@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QMainWindow,QMessageBox,QApplication
 
 from mainwindow import MainWindow
 from mygame import MyGame
@@ -9,8 +9,8 @@ from mygame import MyGame
 
 __author__ = "Kushagra Surana"
 
-class Window(QMainWindow):
 
+class Window(QMainWindow):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
         self.mainWidget = MainWindow()
@@ -19,21 +19,36 @@ class Window(QMainWindow):
         self.setCentralWidget(self.mainWidget)
 
     def change_central_widget(self):
-        if self.mainWidget.ui.rb1.isChecked():
-            if self.mainWidget.ui.rb3.isChecked(): # bot vs bot
-                if (self.mainWidget.ui.bot_path1.text()=="" or self.mainWidget.ui.bot_path2.text()==""):
-                    pass # dialog for null
-                self.gameWidget = MyGame(1,"",self.mainWidget.ui.bot_path1.text(),self.mainWidget.ui.bot_path2.text())
-            else:
-                self.gameWidget = MyGame(1,"",self.mainWidget.ui.bot_path1.text()) # bot vs human
+        f = 1
+        if not ((self.mainWidget.ui.rb1.isChecked() or self.mainWidget.ui.rb2.isChecked()) and (
+                    self.mainWidget.ui.rb3.isChecked() or self.mainWidget.ui.rb4.isChecked())):
+            QMessageBox.about(None, "", "Select Players")
         else:
-            if self.mainWidget.ui.rb3.isChecked():
-                self.gameWidget = MyGame(1,"","",self.mainWidget.ui.bot_path2.text()) # human vs bot
+            if self.mainWidget.ui.rb1.isChecked():
+                if self.mainWidget.ui.rb3.isChecked():  # bot vs bot
+                    if self.mainWidget.ui.bot_path1.text() == "" or self.mainWidget.ui.bot_path2.text() == "":
+                        QMessageBox.about(None, "error", "no bot file")
+                        f = 0  # dialog for null
+                    self.gameWidget = MyGame(1, "", self.mainWidget.ui.bot_path1.text(),
+                                             self.mainWidget.ui.bot_path2.text())
+                else:
+                    if self.mainWidget.ui.bot_path1.text() == "":
+                        QMessageBox.about(None, "error", "no bot file")
+                        f = 0
+                    else:
+                        self.gameWidget = MyGame(1, "", self.mainWidget.ui.bot_path1.text())  # bot vs human
             else:
-                self.gameWidget = MyGame() # human vs human
-
-        self.setCentralWidget(self.gameWidget)
-        self.gameWidget.back.clicked.connect(self.change_central_widget2)
+                if self.mainWidget.ui.rb3.isChecked():
+                    if self.mainWidget.ui.bot_path2.text() == "":
+                        QMessageBox.about(None, "error", "no bot file")
+                        f = 0
+                    else:
+                        self.gameWidget = MyGame(1, "", "", self.mainWidget.ui.bot_path2.text())  # human vs bot
+                else:
+                    self.gameWidget = MyGame()  # human vs human
+            if f:
+                self.setCentralWidget(self.gameWidget)
+                self.gameWidget.back.clicked.connect(self.change_central_widget2)
 
     def change_central_widget2(self):
         self.mainWidget = MainWindow()
@@ -48,9 +63,10 @@ class Window(QMainWindow):
         if (file_path == ""):
             pass
         else:
-            self.gameWidget = MyGame(new_game,file_path)
+            self.gameWidget = MyGame(new_game, file_path)
             self.setCentralWidget(self.gameWidget)
             self.gameWidget.back.clicked.connect(self.change_central_widget2)
+
 
 def main():
     app = QApplication(sys.argv)

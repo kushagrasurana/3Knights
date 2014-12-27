@@ -631,20 +631,21 @@ class MyGame(QWidget):
 
     def result(self,dis=0):  # working
         if dis==1: # white disqualified
-            pass
+            text="white disqualified"
         elif dis==2: # black disqualified
-            pass
+            text="black disqualified"
         else:
             self.score_black += self.black_pawn
+            self.score_white += self.white_pawn
             self.p1_score.setText("Player1-" + chr(self.score_white + 48))
             self.p2_score.setText("Player2-" + chr(self.score_black + 48))
             if self.score_white > self.score_black:
-                print("white win")
+                text="white win"
             elif self.score_white == self.score_black:
-                print("Stalemate")
+                text="Stalemate"
             else:
-                print("Black Win")
-
+                text="Black Win"
+        QMessageBox.about(None,"GG",text)
 
     # bot part
     def write_board_file(self):
