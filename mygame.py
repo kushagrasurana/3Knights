@@ -1,8 +1,7 @@
 import os
 import subprocess
-from PyQt5 import QtCore
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWidget,QMessageBox,QFileDialog
 
 from board import Board
 
@@ -156,6 +155,7 @@ class MyGame(QWidget):
                 if self.game_end():  # check if game is ended
                     self.result()
                 self.make_bot_move()
+                self.write_board_file()
 
     def possible_moves(self, i, j, piece):
         code = self.get_code(piece)
@@ -537,6 +537,7 @@ class MyGame(QWidget):
                 self.game_board.set_piece(old_code, old_col, current_i, current_j)
         if len(self.move_history) == 0:
             self.undo.setDisabled(True)
+        self.write_board_file()
 
     def save_button(self):
         file_name = QFileDialog.getSaveFileName(self, 'Save File', os.getcwd())[0]
@@ -573,6 +574,8 @@ class MyGame(QWidget):
         # make moves to current state of game
         for move in self.move_history:
             self.make_move(move)
+        if len(self.move_history):
+            self.undo.setEnabled(True)
         line = FILE.readline()
         # set scores
         self.p1_score.setText(line.split(' ')[0])
@@ -596,6 +599,7 @@ class MyGame(QWidget):
         if self.black_is_bot:
             self.bot2_path = line.split(' ')[1]
         self.make_bot_move()
+        self.write_board_file()
 
     def make_move(self, move):
         current_i = 8 - (ord(move[1]) - 48)
@@ -649,8 +653,8 @@ class MyGame(QWidget):
 
     # bot part
     def write_board_file(self):
-        board_file = open("self.board_file", 'w')
-        board_file.write("%s\n" % self.last_bot_move)
+        board_file = open("board_file", 'w')
+        board_file.write("%s\n" % self.whites_move)
         for i in range(0, 8):
             for j in range(0, 8):
                 piece = self.game_board.tile[i][j].piece
@@ -659,7 +663,8 @@ class MyGame(QWidget):
                     pos += chr(8 - i + 48)
                     board_file.write("%s %s\n" % (piece, pos))
 
-    def read_move(self, bot_path):
+    @staticmethod
+    def read_move(bot_path):
         print("reading from")
         print(bot_path)
         proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
@@ -704,7 +709,6 @@ class MyGame(QWidget):
                     final_i = 8 - (ord(bot1_move[3]) - 48)
                     final_j = ord(bot1_move[2]) - 97
                     self.board_clicked(final_i, final_j)
-                    self.write_board_file()
                 else:
                     print("invalid")
         else:
@@ -716,6 +720,5 @@ class MyGame(QWidget):
                     final_i = 8 - (ord(bot2_move[3]) - 48)
                     final_j = ord(bot2_move[2]) - 97
                     self.board_clicked(final_i, final_j)
-                    self.write_board_file()
                 else:
                     print("invalid")
