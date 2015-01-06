@@ -630,8 +630,17 @@ class MyGame(QWidget):
             return 1
         if self.black_pawn == 0 and self.black_bishop == 0 and self.black_rook == 0:
             return 1
-        if self.white_rook == 0 and self.white_bishop == 0 and self.black_bishop == 0 and self.black_rook == 0:  # check if player is unable to make a move
-            pass
+        # check if next player is able to make a move
+        flag = 1
+        for i in range(0, 8):
+            if flag:
+                for j in range (0, 8):
+                    if self.get_col(self.game_board.tile[i][j].piece)==self.whites_move:
+                        if len(self.possible_moves(i,j,self.game_board.tile[i][j].piece)) > 0:
+                            flag = 0
+        if flag:
+            return 1
+
 
     def result(self,dis=0):  # working
         if dis==1: # white disqualified
@@ -667,11 +676,21 @@ class MyGame(QWidget):
     def read_move(bot_path):
         print("reading from")
         print(bot_path)
-        proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
+
+        # add support for non executables
+        if bot_path.endswith(".py"):
+            print("python file detected")
+            proc = subprocess.Popen(["python ", bot_path], stdout=subprocess.PIPE)
+        elif bot_path.endswith(".jar"):
+            print("java file detected")
+            proc = subprocess.Popen(["java -jar ", bot_path], stdout=subprocess.PIPE)
+        else:
+            print("executable file")
+            proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
         stddata = proc.communicate()
         move = stddata[0].decode('ascii')
-        print("bot move = ", move[0:4])
-        return move
+        print(move)
+        return move[0:4]
 
     def validate_move(self, move):
         if len(move) != 4:
