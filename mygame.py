@@ -30,7 +30,7 @@ class MyGame(QWidget):
         self.bot2_path = bot2_path
         self.move_count = 0
         self.bot_max_time = 5 # bot must output its move within bot_max_time
-        self.game_speed = 50 # in milliseconds
+        self.game_speed = 200 # in milliseconds
         if self.bot1_path == "":
             self.white_is_bot = 0
         if self.bot2_path == "":
@@ -673,8 +673,8 @@ class MyGame(QWidget):
                     pos += chr(8 - i + 48)
                     board_file.write("%s %s\n" % (piece, pos))
 
-    @staticmethod
-    def read_move(bot_path):
+
+    def read_move(self,bot_path):
         if bot_path.endswith(".py"):
             proc = subprocess.Popen(["python ", bot_path], stdout=subprocess.PIPE)
         elif bot_path.endswith(".jar"):
@@ -705,9 +705,16 @@ class MyGame(QWidget):
             proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
         else:
             proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
-        stddata = proc.communicate()
+        try:
+            stddata = proc.communicate(self.bot_max_time) # accepts output from bot file only if in within the time limits.
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            stddata = ""
         move = stddata[0].decode('ascii')
-        return move[0:4]
+        if len(move)>=4:
+            return move[0:4]
+        else:
+            return ""
 
     def validate_move(self, move):
         if len(move) != 4:
