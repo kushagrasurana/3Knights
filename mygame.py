@@ -2,7 +2,8 @@ import os
 import subprocess
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QWidget,QMessageBox,QFileDialog
-
+from PyQt5.QtCore import QTimer
+import _thread
 from board import Board
 
 
@@ -27,6 +28,9 @@ class MyGame(QWidget):
         self.file_path = file_path
         self.bot1_path = bot1_path
         self.bot2_path = bot2_path
+        self.move_count = 0
+        self.bot_max_time = 5 # bot must output its move within bot_max_time
+        self.game_speed = 50 # in milliseconds
         if self.bot1_path == "":
             self.white_is_bot = 0
         if self.bot2_path == "":
@@ -79,6 +83,8 @@ class MyGame(QWidget):
         self.save.clicked.connect(self.save_button)
 
     def board_clicked(self, i, j):  # when board is clicked
+        self.move_count += 1
+        print(self.move_count)
         if self.selected_i is None:  # if no piece was previously selected
             if (self.game_board.tile[i][j].piece > 5 and self.whites_move == 1) or (
                                 self.game_board.tile[i][j].piece < 6 and self.game_board.tile[i][
@@ -154,8 +160,9 @@ class MyGame(QWidget):
                     self.black_pawn -= 1
                 if self.game_end():  # check if game is ended
                     self.result()
-                self.make_bot_move()
                 self.write_board_file()
+                QTimer.singleShot(self.game_speed,self.make_bot_move)
+
 
     def possible_moves(self, i, j, piece):
         code = self.get_code(piece)
@@ -201,7 +208,7 @@ class MyGame(QWidget):
                 if j + 1 < 8 and self.game_board.tile[i][j + 1].piece == 5:
                     if last_move_initial_i == 1 and last_move_final_i == 3 and last_move_final_j == j + 1:  # qualified for en passant
                         en_pass_list.append((i - 1, j + 1))
-                elif j - 1 > 0 and self.game_board.tile[i][j - 1].piece == 5:
+                if j - 1 >= 0 and self.game_board.tile[i][j - 1].piece == 5:
                     if last_move_initial_i == 1 and last_move_final_i == 3 and last_move_final_j == j - 1:  # qualified for en passant
                         en_pass_list.append((i - 1, j - 1))
         else:
@@ -209,7 +216,7 @@ class MyGame(QWidget):
                 if j + 1 < 8 and self.game_board.tile[i][j + 1].piece == 15:
                     if last_move_initial_i == 6 and last_move_final_i == 4 and last_move_final_j == j + 1:  # qualified for en passant
                         en_pass_list.append((i + 1, j + 1))
-                elif j - 1 > 0 and self.game_board.tile[i][j - 1].piece == 15:
+                if j - 1 >= 0 and self.game_board.tile[i][j - 1].piece == 15:
                     if last_move_initial_i == 6 and last_move_final_i == 4 and last_move_final_j == j - 1:  # qualified for en passant
                         en_pass_list.append((i + 1, j - 1))
         return en_pass_list
@@ -242,7 +249,6 @@ class MyGame(QWidget):
             if (j < 7):
                 if self.get_col(self.game_board.tile[i + 1][j + 1].piece) == 1:
                     movelist.append((i + 1, j + 1))
-        print(movelist)
         return movelist
 
     def rook_movelist(self, i, j, col):
@@ -278,7 +284,6 @@ class MyGame(QWidget):
             tempi -= 1
         if (tempi >= 0 and self.get_col(self.game_board.tile[tempi][j].piece) == col ):  # kill
             movelist.append((tempi, j))
-        print(movelist)
         return movelist
 
     def knight_movelist(self, i, j, col):
@@ -370,7 +375,6 @@ class MyGame(QWidget):
             temp_j -= 1
         if (tempi < 8 and temp_j >= 0 and self.get_col(self.game_board.tile[tempi][temp_j].piece) == col):  # kill
             movelist.append((tempi, temp_j))
-        print(movelist)
         return movelist
 
     def queen_movelist(self, i, j, col):
@@ -509,7 +513,6 @@ class MyGame(QWidget):
         self.game_board.remove_piece(current_i, current_j)
         if 'x' in last_move:
             if 'p' in last_move:  # en_passant
-                print("enpassant")
                 if self.whites_move:
                     self.game_board.set_piece(5, 0, previous_i, current_j)  # revive black pawn
                     self.black_pawn += 1
@@ -622,8 +625,6 @@ class MyGame(QWidget):
     # game ending
     def game_end(
             self):  # game ends when both of the player either of player is unable to move or both player have no pawn remaining
-        print("pawn count=", self.white_pawn, self.black_pawn, "bishops=", self.white_bishop, self.black_bishop,
-              "rook=", self.white_rook, self.black_rook)
         if self.white_pawn == 0 and self.black_pawn == 0:
             return 1
         if self.white_pawn == 0 and self.white_bishop == 0 and self.white_rook == 0:
@@ -674,22 +675,38 @@ class MyGame(QWidget):
 
     @staticmethod
     def read_move(bot_path):
-        print("reading from")
-        print(bot_path)
-
-        # add support for non executables
         if bot_path.endswith(".py"):
-            print("python file detected")
             proc = subprocess.Popen(["python ", bot_path], stdout=subprocess.PIPE)
         elif bot_path.endswith(".jar"):
-            print("java file detected")
             proc = subprocess.Popen(["java -jar ", bot_path], stdout=subprocess.PIPE)
+        elif bot_path.endswith(".class"):
+            class_name = bot_path.split('/')[-1].split('.')[0]
+            pos = bot_path.rfind('/')
+            class_path =bot_path[0:pos]
+            proc = subprocess.Popen(["java","-classpath",class_path,class_name], stdout=subprocess.PIPE)
+        elif bot_path.endswith(".java"):
+            proc = subprocess.Popen(["javac",bot_path], stdout=subprocess.PIPE)
+            proc.wait()
+            class_name = bot_path.split('/')[-1].split('.')[0]
+            pos = bot_path.rfind('/')
+            class_path =bot_path[0:pos]
+            proc = subprocess.Popen(["java","-classpath",class_path,class_name], stdout=subprocess.PIPE)
+        elif bot_path.endswith(".cpp"):
+            command =  "g++ ",bot_path," -o bot.out"
+            proc = subprocess.Popen([command], stdout=subprocess.PIPE)
+            bot_path = "bot.out"
+            proc.wait()
+            proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
+        elif bot_path.endswith(".c"):
+            command =  "gcc ",bot_path," -o bot.out"
+            proc = subprocess.Popen([command], stdout=subprocess.PIPE)
+            bot_path = "bot.out"
+            proc.wait()
+            proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
         else:
-            print("executable file")
             proc = subprocess.Popen([bot_path], stdout=subprocess.PIPE)
         stddata = proc.communicate()
         move = stddata[0].decode('ascii')
-        print(move)
         return move[0:4]
 
     def validate_move(self, move):
@@ -699,17 +716,13 @@ class MyGame(QWidget):
         current_j = ord(move[0]) - 97
         final_i = 8 - (ord(move[3]) - 48)
         final_j = ord(move[2]) - 97
-        print(current_i, current_j, final_i, final_j)
         piece = self.game_board.tile[current_i][current_j].piece
-        print("piece selected=", piece)
         if not (8 > current_i >= 0 and 8 > final_i >= 0 and 8 > current_j >= 0 and 0 <= final_j < 8):
             return False
-        print("2")
         if self.whites_move:
             if self.get_col(piece) != 1:
                 return False
         else:
-            print("3")
             if self.get_col(piece) != 0:
                 return False
         if (final_i, final_j) in self.possible_moves(current_i, current_j,self.game_board.tile[current_i][current_j].piece):
@@ -722,14 +735,13 @@ class MyGame(QWidget):
             if self.white_is_bot:  # get move from bot1
                 bot1_move = self.read_move(self.bot1_path)
                 if self.validate_move(bot1_move):
-                    print("validated true")
                     self.selected_i = 8 - (ord(bot1_move[1]) - 48)
                     self.selected_j = ord(bot1_move[0]) - 97
                     final_i = 8 - (ord(bot1_move[3]) - 48)
                     final_j = ord(bot1_move[2]) - 97
                     self.board_clicked(final_i, final_j)
                 else:
-                    print("invalid")
+                    self.display_message_box("Invalid move played","Black Wins")
         else:
             if self.black_is_bot:  # get move from bot2
                 bot2_move = self.read_move(self.bot2_path)
@@ -740,4 +752,8 @@ class MyGame(QWidget):
                     final_j = ord(bot2_move[2]) - 97
                     self.board_clicked(final_i, final_j)
                 else:
-                    print("invalid")
+                    self.display_message_box("Invalid move played","White Wins")
+
+    @staticmethod
+    def display_message_box(title,message):
+        QMessageBox.about(None,title,message)

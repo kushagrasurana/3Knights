@@ -1,5 +1,3 @@
-import os
-
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QLabel
@@ -16,7 +14,7 @@ class MyLabel(QLabel):
         self.j=0 #stores y coordinate
 
         if img is not None:
-            self.pixmap = QPixmap(os.getcwd() + img)
+            self.pixmap = QPixmap(img)
         else:
             self.pixmap = None
 
@@ -34,7 +32,7 @@ class MyLabel(QLabel):
             super(MyLabel, self).paintEvent(event)
 
     def change_pixmap(self, img):
-        self.pixmap = QPixmap(os.getcwd() + img)
+        self.pixmap = QPixmap(img)
         self.repaint()
 
     def mousePressEvent(self, QMouseEvent):
