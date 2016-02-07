@@ -41,6 +41,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="onlineGameButton">
+           <property name="text">
+            <string>Online Game</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="start">
            <property name="text">
             <string>Start</string>
@@ -166,10 +173,6 @@
                </layout>
               </item>
              </layout>
-             <zorder>rb3</zorder>
-             <zorder>rb4</zorder>
-             <zorder></zorder>
-             <zorder>lab3</zorder>
             </widget>
            </item>
            <item>
@@ -331,24 +334,6 @@
     </layout>
    </item>
   </layout>
-  <zorder>browse3</zorder>
-  <zorder>rules</zorder>
-  <zorder>new_game</zorder>
-  <zorder>bot_path2</zorder>
-  <zorder>back1</zorder>
-  <zorder>start</zorder>
-  <zorder>browse2</zorder>
-  <zorder>load_game</zorder>
-  <zorder>bot_path1</zorder>
-  <zorder>browse1</zorder>
-  <zorder>load_path</zorder>
-  <zorder>back2</zorder>
-  <zorder>load_game2</zorder>
-  <zorder>groupBox</zorder>
-  <zorder>groupBox_2</zorder>
-  <zorder>back2</zorder>
-  <zorder>horizontalSpacer_4</zorder>
-  <zorder>horizontalSpacer_5</zorder>
   <zorder></zorder>
  </widget>
  <resources/>

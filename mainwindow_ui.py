@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'G:\Coding\Python\3Knights\mainwindow_ui.ui'
+# Form implementation generated from reading ui file 'mainwindow_ui.ui'
 #
-# Created: Wed Dec 10 19:53:30 2014
+# Created: Sun Feb  7 16:31:54 2016
 #      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -26,6 +26,9 @@ class Ui_Form(object):
         self.new_game = QtWidgets.QPushButton(Form)
         self.new_game.setObjectName("new_game")
         self.horizontalLayout_6.addWidget(self.new_game)
+        self.onlineGameButton = QtWidgets.QPushButton(Form)
+        self.onlineGameButton.setObjectName("onlineGameButton")
+        self.horizontalLayout_6.addWidget(self.onlineGameButton)
         self.start = QtWidgets.QPushButton(Form)
         self.start.setObjectName("start")
         self.horizontalLayout_6.addWidget(self.start)
@@ -46,8 +49,7 @@ class Ui_Form(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.groupBox)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.lab2 = QtWidgets.QLabel(self.groupBox)
-        self.lab2.setStyleSheet("QLabel { color: red; }\n"
-"               QLabel:hover { color: blue; }")
+        self.lab2.setStyleSheet("background-color:qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 176, 176, 167), stop:0.0909091 rgba(0, 255, 191, 51), stop:0.1 rgba(0, 255, 234, 255), stop:0.409091 rgba(1, 255, 223, 92), stop:0.6 rgba(180, 255, 240, 84), stop:1 rgba(76, 218, 255, 205))")
         self.lab2.setObjectName("lab2")
         self.verticalLayout_3.addWidget(self.lab2)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
@@ -157,6 +159,7 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.new_game.setText(_translate("Form", "New Game"))
+        self.onlineGameButton.setText(_translate("Form", "Online Game"))
         self.start.setText(_translate("Form", "Start"))
         self.back1.setText(_translate("Form", "Back"))
         self.lab2.setText(_translate("Form", "Player 1"))

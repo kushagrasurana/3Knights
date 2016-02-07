@@ -1,5 +1,7 @@
 import os
 import subprocess
+import socket
+import pickle
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QWidget,QMessageBox,QFileDialog
 from PyQt5.QtCore import QTimer
@@ -8,7 +10,7 @@ from board import Board
 
 
 class MyGame(QWidget):
-    def __init__(self, new_game=1, file_path="", bot1_path="", bot2_path=""):
+    def __init__(self, new_game=1, file_path="", bot1_path="", bot2_path="", is_online = 0, socket = 0, i_am_white = 0):
         super(MyGame, self).__init__()
         self.whites_move = 1
         self.selected_i = None
@@ -29,17 +31,27 @@ class MyGame(QWidget):
         self.bot1_path = bot1_path
         self.bot2_path = bot2_path
         self.move_count = 0
-        self.bot_max_time = 5 # bot must output its move within bot_max_time
-        self.game_speed = 200 # in milliseconds
+        self.bot_max_time = 5  # bot must output its move within bot_max_time
+        self.game_speed = 200  # in milliseconds
+        self.we_have_bot = 1
+        self.is_online = is_online
+
         if self.bot1_path == "":
             self.white_is_bot = 0
         if self.bot2_path == "":
             self.black_is_bot = 0
+        if self.black_is_bot == 0 and self.white_is_bot == 0:
+            self.we_have_bot = 0
+
         self.initUI()
         self.write_board_file()
         if new_game == 0:
             self.load_game()
-        self.make_bot_move()
+        if is_online:
+            self.online_game_init(socket, i_am_white)
+        elif (self.white_is_bot and self.whites_move) or (self.black_is_bot and not self.whites_move):
+            self.make_bot_move()
+
 
     def initUI(self):
         self.game_board = Board()
@@ -76,15 +88,26 @@ class MyGame(QWidget):
         self.game_board.set_piece(2, 1, 7, 1)
         for i in range(0, 8):
             for j in range(0, 8):
-                self.game_board.tile[i][j].clickedk.connect(self.board_clicked)
+                self.game_board.tile[i][j].clickedk.connect(self.select_tile)
         self.game_board.addLayout(self.horizontalLayout, 8, 0, 1, 8)
         self.setLayout(self.game_board)
         self.undo.clicked.connect(self.undo_move)
         self.save.clicked.connect(self.save_button)
 
-    def board_clicked(self, i, j):  # when board is clicked
-        self.move_count += 1
-        print(self.move_count)
+
+    def online_game_init(self, socket, i_am_white):
+        self.socket = socket   # socket has the connection
+        self.i_am_white = i_am_white    # only required for online game
+        if (i_am_white and self.bot1_path is not None) or (not i_am_white and self.bot2_path is not None):
+            self.i_am_bot = 1
+        else:
+            self.i_am_bot = 0
+
+
+    def select_tile(self, i, j):
+        if self.is_online and self.i_am_bot:
+            return
+
         if self.selected_i is None:  # if no piece was previously selected
             if (self.game_board.tile[i][j].piece > 5 and self.whites_move == 1) or (
                                 self.game_board.tile[i][j].piece < 6 and self.game_board.tile[i][
@@ -97,71 +120,84 @@ class MyGame(QWidget):
             self.selected_j = None
             self.change_style(i, j, 0)
         else:  # makes the move
-            if (i, j) in self.possible_moves(self.selected_i, self.selected_j,
-                                             self.game_board.tile[self.selected_i][self.selected_j].piece):
-                if self.game_board.tile[i][j].piece != -1:  # already a piece there
-                    code = self.get_code(self.game_board.tile[i][j].piece)
-                    col = self.get_col(self.game_board.tile[i][j].piece)
-                    temp_move = (chr(self.selected_j + 97) + chr(8 - self.selected_i + 48) + chr(j + 97) + chr(
-                        8 - i + 48) + 'x' + chr(self.game_board.tile[i][j].piece + 48))
-                    if code == 5:  # dead piece is pawn
-                        if col == 1:
-                            self.white_pawn -= 1
-                        else:
-                            self.black_pawn -= 1
-                    elif code == 4:  # dead piece is rook
-                        if col == 1:
-                            self.white_rook -= 1
-                        else:
-                            self.black_rook -= 1
-                    else:  # dead piece is bishop
-                        if col == 1:
-                            self.white_bishop -= 1
-                        else:
-                            self.black_bishop -= 1
-                elif (i, j) in self.en_passant(self.selected_i, self.selected_j, self.get_col(
-                        self.game_board.tile[self.selected_i][self.selected_j].piece)):  # check for en_passant
-                    if self.whites_move:
-                        self.black_pawn -= 1
-                        self.game_board.remove_piece(i + 1, j)
-                    else:
-                        self.white_pawn -= 1
-                        self.game_board.remove_piece(i - 1, j)
-                    temp_move = (
-                        chr(self.selected_j + 97) + chr(8 - self.selected_i + 48) + chr(j + 97) + chr(
-                            8 - i + 48) + "xp")
-                else:
-                    temp_move = (
-                        chr(self.selected_j + 97) + chr(8 - self.selected_i + 48) + chr(j + 97) + chr(8 - i + 48))
-                self.move_history.append(temp_move)
-                self.undo.setEnabled(True)
-                piece = self.game_board.tile[self.selected_i][self.selected_j].piece
-                code = self.get_code(piece)
-                col = self.get_col(piece)
-                self.game_board.remove_piece(self.selected_i, self.selected_j)
-                self.game_board.set_piece(code, col, i, j)
+            if self.is_valid_move(self.selected_i, self.selected_j, i, j):
+                if self.is_online:
+                    self.send_move(self.selected_i, self.selected_j, i, j)
+                self.play_move(self.selected_i, self.selected_j, i, j)
+            else:
                 self.change_style(self.selected_i, self.selected_j, 0)
-                self.selected_i = None
-                self.selected_j = None
-                if self.whites_move == 1:  # change turn
-                    self.whites_move = 0
-                else:
-                    self.whites_move = 1
-                if code == 5 and i == 0 and col == 1:  # check if pawn is promoted
-                    self.score_white += 1
-                    self.game_board.remove_piece(i, j)
-                    current_score1 = ord(self.p1_score.text()[-1])
-                    self.p1_score.setText("Player1-" + chr(self.score_white + 48))
+            self.selected_i = None
+            self.selected_j = None
+
+
+    def play_move(self, previous_i, previous_j, new_i, new_j):  # function which processes move made by a player
+        self.move_count += 1
+        if self.game_board.tile[new_i][new_j].piece != -1:  # already a piece there
+            code = self.get_code(self.game_board.tile[new_i][new_j].piece)
+            col = self.get_col(self.game_board.tile[new_i][new_j].piece)
+            temp_move = (chr(previous_j + 97) + chr(8 - previous_i + 48) + chr(new_j + 97) + chr(
+                8 - new_i + 48) + 'x' + chr(self.game_board.tile[new_i][new_j].piece + 48))
+            if code == 5:  # dead piece is pawn
+                if col == 1:
                     self.white_pawn -= 1
-                if code == 5 and i == 7 and col == 0:
-                    self.score_black += 1
-                    self.game_board.remove_piece(i, j)
-                    self.p2_score.setText("Player2-" + chr(self.score_black + 48))
+                else:
                     self.black_pawn -= 1
-                if self.game_end():  # check if game is ended
-                    self.result()
-                self.write_board_file()
-                QTimer.singleShot(self.game_speed,self.make_bot_move)
+            elif code == 4:  # dead piece is rook
+                if col == 1:
+                    self.white_rook -= 1
+                else:
+                    self.black_rook -= 1
+            else:  # dead piece is bishop
+                if col == 1:
+                    self.white_bishop -= 1
+                else:
+                    self.black_bishop -= 1
+        elif (new_i, new_j) in self.en_passant(previous_i, previous_j, self.get_col(
+                self.game_board.tile[previous_i][previous_j].piece)):  # check for en_passant
+            if self.whites_move:
+                self.black_pawn -= 1
+                self.game_board.remove_piece(new_i + 1, new_j)
+            else:
+                self.white_pawn -= 1
+                self.game_board.remove_piece(new_i - 1, new_j)
+            temp_move = (
+                chr(previous_j + 97) + chr(8 - previous_i + 48) + chr(new_j + 97) + chr(
+                    8 - new_i + 48) + "xp")
+        else:
+            temp_move = (
+                chr(previous_j + 97) + chr(8 - previous_i + 48) + chr(new_j + 97) + chr(8 - new_i + 48))
+        self.move_history.append(temp_move)
+        self.undo.setEnabled(True)
+        piece = self.game_board.tile[previous_i][previous_j].piece
+        code = self.get_code(piece)
+        col = self.get_col(piece)
+        self.game_board.remove_piece(previous_i, previous_j)
+        self.game_board.set_piece(code, col, new_i, new_j)
+        self.change_style(previous_i, previous_j, 0)
+
+        if self.whites_move == 1:  # change turn
+            self.whites_move = 0
+        else:
+            self.whites_move = 1
+        if code == 5 and new_i == 0 and col == 1:  # check if pawn is promoted
+            self.score_white += 1
+            self.game_board.remove_piece(new_i, new_j)
+            self.p1_score.setText("Player1-" + chr(self.score_white + 48))
+            self.white_pawn -= 1
+        if code == 5 and new_i == 7 and col == 0:
+            self.score_black += 1
+            self.game_board.remove_piece(new_i, new_j)
+            self.p2_score.setText("Player2-" + chr(self.score_black + 48))
+            self.black_pawn -= 1
+        if self.game_end():  # check if game is ended
+            self.result()
+        self.write_board_file()
+        if self.is_online:
+            if (not self.i_am_white and self.whites_move) or (self.i_am_white and not self.whites_move):
+                self.recieve_move()
+        else:
+            QTimer.singleShot(self.game_speed, self.make_bot_move)
+
 
 
     def possible_moves(self, i, j, piece):
@@ -480,7 +516,7 @@ class MyGame(QWidget):
                 # save load and undo
 
     def undo_move(self):
-        if self.whites_move == 1:
+        if self.whites_move == 1:       # changes whose turn to play
             self.whites_move = 0
         else:
             self.whites_move = 1
@@ -723,6 +759,9 @@ class MyGame(QWidget):
         current_j = ord(move[0]) - 97
         final_i = 8 - (ord(move[3]) - 48)
         final_j = ord(move[2]) - 97
+        return self.is_valid_move(current_i, current_j, final_i, final_j)
+
+    def is_valid_move(self, current_i, current_j, final_i, final_j):
         piece = self.game_board.tile[current_i][current_j].piece
         if not (8 > current_i >= 0 and 8 > final_i >= 0 and 8 > current_j >= 0 and 0 <= final_j < 8):
             return False
@@ -738,29 +777,44 @@ class MyGame(QWidget):
             return False
 
     def make_bot_move(self):
+        if not self.we_have_bot:
+            return
+
         if self.whites_move:
             if self.white_is_bot:  # get move from bot1
                 bot1_move = self.read_move(self.bot1_path)
                 if self.validate_move(bot1_move):
-                    self.selected_i = 8 - (ord(bot1_move[1]) - 48)
-                    self.selected_j = ord(bot1_move[0]) - 97
-                    final_i = 8 - (ord(bot1_move[3]) - 48)
-                    final_j = ord(bot1_move[2]) - 97
-                    self.board_clicked(final_i, final_j)
+                    previous_i = 8 - (ord(bot1_move[1]) - 48)
+                    previous_j = ord(bot1_move[0]) - 97
+                    new_i = 8 - (ord(bot1_move[3]) - 48)
+                    new_j = ord(bot1_move[2]) - 97
+                    if self.is_online:
+                        self.send_move(previous_i, previous_j, new_i, new_j)
+                    self.play_move(previous_i, previous_j, new_i, new_j)
                 else:
                     self.display_message_box("Invalid move played","Black Wins")
-        else:
-            if self.black_is_bot:  # get move from bot2
-                bot2_move = self.read_move(self.bot2_path)
-                if self.validate_move(bot2_move):
-                    self.selected_i = 8 - (ord(bot2_move[1]) - 48)
-                    self.selected_j = ord(bot2_move[0]) - 97
-                    final_i = 8 - (ord(bot2_move[3]) - 48)
-                    final_j = ord(bot2_move[2]) - 97
-                    self.board_clicked(final_i, final_j)
-                else:
-                    self.display_message_box("Invalid move played","White Wins")
+        elif self.black_is_bot:  # get move from bot2
+            bot2_move = self.read_move(self.bot2_path)
+            if self.validate_move(bot2_move):
+                previous_i = 8 - (ord(bot2_move[1]) - 48)
+                previous_j = ord(bot2_move[0]) - 97
+                new_i = 8 - (ord(bot2_move[3]) - 48)
+                new_j = ord(bot2_move[2]) - 97
+                if self.is_online:
+                        self.send_move(previous_i, previous_j, new_i, new_j)
+                self.play_move(previous_i, previous_j, new_i, new_j)
+            else:
+                self.display_message_box("Invalid move played","White Wins")
 
     @staticmethod
     def display_message_box(title,message):
         QMessageBox.about(None,title,message)
+
+    def send_move(self, previous_i, previous_j, new_i, new_j):
+        move = [previous_i, previous_j, new_i, new_j]
+        self.socket.send(pickle.dump(move))
+
+    def recieve_move(self):
+        data = self.socket.recv(1024)
+        move = pickle.loads(data)
+        self.play_move(move[0], move[1], move[2], move[3])

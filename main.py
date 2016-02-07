@@ -4,6 +4,7 @@ import sys
 from PyQt5.QtWidgets import QMainWindow,QMessageBox,QApplication
 
 from mainwindow import MainWindow
+from onlinewindow import OnlineWindow
 from mygame import MyGame
 
 
@@ -15,8 +16,13 @@ class Window(QMainWindow):
         super(Window, self).__init__(parent)
         self.mainWidget = MainWindow()
         self.mainWidget.ui.start.clicked.connect(self.change_central_widget)
-        self.mainWidget.ui.load_game2.clicked.connect(self.change_central_widget3)
+        self.mainWidget.ui.load_game2.clicked.connect(self.showLoadGameWindow)
+        self.mainWidget.ui.onlineGameButton.clicked.connect(self.show_online_game_window)
         self.setCentralWidget(self.mainWidget)
+
+    def show_online_game_window(self):
+        self.onlineWindow = OnlineWindow()
+        self.setCentralWidget(self.onlineWindow)
 
     def change_central_widget(self):
         f = 1
@@ -53,10 +59,10 @@ class Window(QMainWindow):
     def change_central_widget2(self):
         self.mainWidget = MainWindow()
         self.mainWidget.ui.start.clicked.connect(self.change_central_widget)
-        self.mainWidget.ui.load_game2.clicked.connect(self.change_central_widget3)
+        self.mainWidget.ui.load_game2.clicked.connect(self.showLoadGameWindow)
         self.setCentralWidget(self.mainWidget)
 
-    def change_central_widget3(self):
+    def showLoadGameWindow(self):
         new_game = 0
         print("loading")
         file_path = self.mainWidget.ui.load_path.text()
