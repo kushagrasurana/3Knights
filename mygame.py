@@ -4,13 +4,15 @@ import socket
 import pickle
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QWidget,QMessageBox,QFileDialog
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSignal
 import _thread
 from board import Board
 
 
 class MyGame(QWidget):
-    def __init__(self, new_game=1, file_path="", bot1_path="", bot2_path="", is_online = 0, socket = 0, i_am_white = 0):
+    data_received = pyqtSignal(int, int, int, int)
+
+    def __init__(self, new_game=1, file_path="", bot1_path="", bot2_path="", is_online=0, socket=None, i_am_white=0):
         super(MyGame, self).__init__()
         self.whites_move = 1
         self.selected_i = None
@@ -98,14 +100,19 @@ class MyGame(QWidget):
     def online_game_init(self, socket, i_am_white):
         self.socket = socket   # socket has the connection
         self.i_am_white = i_am_white    # only required for online game
-        if (i_am_white and self.bot1_path is not None) or (not i_am_white and self.bot2_path is not None):
+        if (i_am_white and self.bot1_path != "") or (not i_am_white and self.bot2_path != ""):
             self.i_am_bot = 1
         else:
             self.i_am_bot = 0
+        self.data_received.connect(self.play_received_move)
 
+    def is_my_turn(self):
+        if (self.i_am_white and self.move_count % 2 == 0) or (not self.i_am_white and self.move_count % 2 == 1):
+            return True
+        return False
 
     def select_tile(self, i, j):
-        if self.is_online and self.i_am_bot:
+        if self.is_online and (self.i_am_bot or not self.is_my_turn()):
             return
 
         if self.selected_i is None:  # if no piece was previously selected
@@ -194,7 +201,7 @@ class MyGame(QWidget):
         self.write_board_file()
         if self.is_online:
             if (not self.i_am_white and self.whites_move) or (self.i_am_white and not self.whites_move):
-                self.recieve_move()
+                _thread.start_new_thread(self.received_move, ())
         else:
             QTimer.singleShot(self.game_speed, self.make_bot_move)
 
@@ -812,9 +819,12 @@ class MyGame(QWidget):
 
     def send_move(self, previous_i, previous_j, new_i, new_j):
         move = [previous_i, previous_j, new_i, new_j]
-        self.socket.send(pickle.dump(move))
+        self.socket.send(pickle.dumps(move))
 
-    def recieve_move(self):
+    def received_move(self):
         data = self.socket.recv(1024)
         move = pickle.loads(data)
-        self.play_move(move[0], move[1], move[2], move[3])
+        self.data_received.emit(move[0], move[1], move[2], move[3])
+
+    def play_received_move(self, previous_i, previous_j, new_i, new_j):
+        self.play_move(previous_i, previous_j, new_i, new_j)

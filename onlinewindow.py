@@ -1,4 +1,5 @@
 import socket
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QMainWindow,QMessageBox, QFileDialog
 from onlinewindow_ui import Ui_MainWindow
 from urllib.request import urlopen
@@ -11,6 +12,7 @@ from mygame import MyGame
 game_port = 12574
 
 class OnlineWindow(QMainWindow):
+    connectionEstablished = pyqtSignal(socket.socket, int)
     def __init__(self):
         super(OnlineWindow, self).__init__()
         self.host_private_ip = ""
@@ -18,6 +20,7 @@ class OnlineWindow(QMainWindow):
         self.has_connected = 0
         self.lock = threading.Lock()
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        self.connectionEstablished.connect(self.openGame)
         _thread.start_new_thread(self.create_server, ())
 
         self.init_ui()
@@ -60,7 +63,7 @@ class OnlineWindow(QMainWindow):
         if not self.has_connected:
             self.has_connected = 1
             self.client_socket.close()
-            self.openGame(self.connection_socket, 1)
+            self.connectionEstablished.emit(self.connection_socket, 1)
 
 
 
@@ -75,16 +78,16 @@ class OnlineWindow(QMainWindow):
             if not self.has_connected:
                 self.has_connected = 1
                 self.server_socket.close()
-                self.openGame(self.client_socket, 0)
+                self.connectionEstablished.emit(self.client_socket, 0)
         except Exception as e:
             QMessageBox.about(None, "Connection Problem", "Error : %s" % e)
             self.ui.connectButton.setEnabled(True)
 
     def openGame(self, socket, i_am_white):
         if i_am_white:
-            self.gameWidget = MyGame(1, "", self.ui.botPath, "", 1, socket, i_am_white)
+            self.gameWidget = MyGame(1, "", self.ui.botPath.text(), "", 1, socket, i_am_white)
         else:
-            self.gameWidget = MyGame(1, "", "", self.ui.botPath, 1, socket, i_am_white)
+            self.gameWidget = MyGame(1, "", "", self.ui.botPath.text(), 1, socket, i_am_white)
         self.setCentralWidget(self.gameWidget)
 
     def browse_clicked(self):
