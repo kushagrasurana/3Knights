@@ -60,7 +60,10 @@ class OnlineWindow(QMainWindow):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         self.server_socket.bind((host, port))
         self.server_socket.listen(1)
-        self.connection_socket, address = self.server_socket.accept()
+        try:
+            self.connection_socket, address = self.server_socket.accept()
+        except Exception as e:
+            print("Server socket was closed because %s " % e)
 
         self.lock.acquire()
         if not self.has_connected:
@@ -79,7 +82,7 @@ class OnlineWindow(QMainWindow):
             self.lock.acquire()
             if not self.has_connected:
                 self.has_connected = 1
-                self.close_socket_signal.emit(self.server_socket.close)
+                self.close_socket_signal.emit(self.server_socket)
                 self.connection_established.emit(self.client_socket, 0)
         except Exception as e:
             QMessageBox.about(None, "Connection Problem", "Error : %s" % e)

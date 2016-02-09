@@ -819,11 +819,15 @@ class MyGame(QWidget):
 
     def send_move(self, previous_i, previous_j, new_i, new_j):
         move = [previous_i, previous_j, new_i, new_j]
-        self.socket.send(pickle.dumps(move))
+        try:
+            self.socket.send(pickle.dumps(move))
+        except Exception as e:
+            print ("unable to send because %s" % e)
 
     def received_move(self):
         data = self.socket.recv(1024)
         move = pickle.loads(data)
+        print ("Recieved move", move)
         self.data_received.emit(move[0], move[1], move[2], move[3])
 
     def play_received_move(self, previous_i, previous_j, new_i, new_j):
