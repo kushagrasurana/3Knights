@@ -12,7 +12,9 @@ from mygame import MyGame
 game_port = 12574
 
 class OnlineWindow(QMainWindow):
-    connectionEstablished = pyqtSignal(socket.socket, int)
+    connection_established = pyqtSignal(socket.socket, int)
+    close_socket_signal = pyqtSignal(socket.socket)
+
     def __init__(self):
         super(OnlineWindow, self).__init__()
         self.host_private_ip = ""
@@ -20,7 +22,8 @@ class OnlineWindow(QMainWindow):
         self.has_connected = 0
         self.lock = threading.Lock()
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-        self.connectionEstablished.connect(self.openGame)
+        self.connection_established.connect(self.openGame)
+        self.close_socket_signal.connect(self.close_socket)
         _thread.start_new_thread(self.create_server, ())
 
         self.init_ui()
@@ -62,9 +65,8 @@ class OnlineWindow(QMainWindow):
         self.lock.acquire()
         if not self.has_connected:
             self.has_connected = 1
-            self.client_socket.close()
-            self.connectionEstablished.emit(self.connection_socket, 1)
-
+            self.close_socket_signal.emit(self.client_socket)
+            self.connection_established.emit(self.connection_socket, 1)
 
 
     def connect_to_opponent(self):
@@ -77,8 +79,8 @@ class OnlineWindow(QMainWindow):
             self.lock.acquire()
             if not self.has_connected:
                 self.has_connected = 1
-                self.server_socket.close()
-                self.connectionEstablished.emit(self.client_socket, 0)
+                self.close_socket_signal.emit(self.server_socket.close)
+                self.connection_established.emit(self.client_socket, 0)
         except Exception as e:
             QMessageBox.about(None, "Connection Problem", "Error : %s" % e)
             self.ui.connectButton.setEnabled(True)
@@ -92,3 +94,9 @@ class OnlineWindow(QMainWindow):
 
     def browse_clicked(self):
         self.ui.botPath.setText(QFileDialog.getOpenFileName()[0])
+
+    def close_socket(self, socket):
+        try:
+            socket.close()
+        except Exception as e:
+           print("ERROR : %s" % e)
