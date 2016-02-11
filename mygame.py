@@ -105,11 +105,18 @@ class MyGame(QWidget):
         else:
             self.i_am_bot = 0
         self.data_received.connect(self.play_received_move)
+        if self.is_my_turn():
+            if self.i_am_bot:
+                self.make_bot_move()
+        else:
+            _thread.start_new_thread(self.received_move(), ())
+
 
     def is_my_turn(self):
         if (self.i_am_white and self.move_count % 2 == 0) or (not self.i_am_white and self.move_count % 2 == 1):
             return True
         return False
+
 
     def select_tile(self, i, j):
         if self.is_online and (self.i_am_bot or not self.is_my_turn()):
@@ -200,8 +207,10 @@ class MyGame(QWidget):
             self.result()
         self.write_board_file()
         if self.is_online:
-            if (not self.i_am_white and self.whites_move) or (self.i_am_white and not self.whites_move):
+            if not self.is_my_turn():
                 _thread.start_new_thread(self.received_move, ())
+            elif self.i_am_bot:
+                self.make_bot_move()
         else:
             QTimer.singleShot(self.game_speed, self.make_bot_move)
 
