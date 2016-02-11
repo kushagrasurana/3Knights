@@ -109,7 +109,7 @@ class MyGame(QWidget):
             if self.i_am_bot:
                 self.make_bot_move()
         else:
-            _thread.start_new_thread(self.received_move(), ())
+            _thread.start_new_thread(self.received_move, ())
 
 
     def is_my_turn(self):
@@ -831,12 +831,14 @@ class MyGame(QWidget):
         try:
             self.socket.send(pickle.dumps(move))
         except Exception as e:
-            print ("unable to send because %s" % e)
+            QMessageBox.about(None, "Communication error", e)
 
     def received_move(self):
-        data = self.socket.recv(1024)
+        try:
+            data = self.socket.recv(1024)
+        except Exception as e:
+            QMessageBox.about(None, "Connection closed", e)
         move = pickle.loads(data)
-        print ("Recieved move", move)
         self.data_received.emit(move[0], move[1], move[2], move[3])
 
     def play_received_move(self, previous_i, previous_j, new_i, new_j):
