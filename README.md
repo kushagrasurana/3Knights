@@ -6,6 +6,18 @@ A Simple chess based game.
 Requirements
 ========
 Python and PyQt5 
+#### Ubuntu
+sudo add-apt-repository ppa:fkrull/deadsnakes
+
+sudo apt-get update
+
+sudo apt-get install python3
+
+sudo apt-get install python-pyqt5
+
+#### Arch
+sudo pacman -S python python-pyqt5
+
 
 To Play
 ====
