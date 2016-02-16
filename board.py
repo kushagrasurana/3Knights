@@ -38,45 +38,45 @@ class Board(QGridLayout):
     def set_piece(self, code, col, x, y):
         if code == 0:  # king
             if col == 0:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\BK.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "BK.png"))
                 self.tile[x][y].piece=0
             else:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\WK.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "WK.png"))
                 self.tile[x][y].piece=10
         elif code == 1:  # queen
             if col == 0:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\BQ.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "BQ.png"))
                 self.tile[x][y].piece=1
             else:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\WQ.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "WQ.png"))
                 self.tile[x][y].piece=11
         elif code == 2:  # bishop
             if col == 0:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\BB.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "BB.png"))
                 self.tile[x][y].piece=2
             else:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\WB.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "WB.png"))
                 self.tile[x][y].piece=12
         elif code == 3:  # knight
             if col == 0:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\BT.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "BT.png"))
                 self.tile[x][y].piece=3
             else:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\WT.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "WT.png"))
                 self.tile[x][y].piece=13
         elif code == 4:  # rook
             if col == 0:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\BR.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "BR.png"))
                 self.tile[x][y].piece=4
             else:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\WR.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "WR.png"))
                 self.tile[x][y].piece=14
         elif code == 5:  # pawn
             if col == 0:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\BP.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "BP.png"))
                 self.tile[x][y].piece=5
             else:
-                self.tile[x][y].change_pixmap(path.join(self.dir,"images\WP.png"))
+                self.tile[x][y].change_pixmap(path.join(self.dir,"images", "WP.png"))
                 self.tile[x][y].piece=15
 
     def remove_piece(self,x,y):
